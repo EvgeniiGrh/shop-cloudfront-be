@@ -7,7 +7,7 @@ export async function getProductsList(event) {
   try {
     productsArray = await productsList
   } catch (error) {
-    return response = {
+    return {
       statusCode: 500,
       body: JSON.stringify({ message: `Internal server error: ${error}` })
     };

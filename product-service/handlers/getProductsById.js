@@ -6,7 +6,6 @@ export async function getProductsById(event) {
 
   const matchItem = (await productsList).find((item) => item.id === +id);
 
-
   if (!matchItem) {
     return {
       statusCode: 422,
