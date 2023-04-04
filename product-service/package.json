@@ -1,6 +1,8 @@
 {
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "swagger": "sls generate-swagger",
+    "start:local": "serverless offline start"
   },
   "devDependencies": {
     "jest": "^29.5.0",
