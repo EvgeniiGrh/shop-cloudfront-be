@@ -29,6 +29,15 @@ provider:
     cors: true
 
 
+plugins:
+  - serverless-webpack
+
+custom:
+  webpack:
+    webpackConfig: 'webpack.config.js' 
+    includeModules: false 
+    packager: 'npm' 
+
 # you can add statements to the Lambda function's IAM Role here
 #  iam:
 #    role:
@@ -61,13 +70,13 @@ provider:
 
 functions:
   getProductsList:
-    handler: handler.getProductsList
+    handler: handlers/getProductsList.getProductsList
     events:
       - httpApi:
           path: /products
           method: get
   getProductsById:
-    handler: productByIdHandler.getProductsById
+    handler: handlers/getProductsById.getProductsById
     events:
       - httpApi:
           path: /products/{id}
