@@ -1,17 +1,32 @@
 'use strict';
-import { productsList } from '../products.mocks';
+import * as AWS from 'aws-sdk'
+
+const dynamo = new AWS.DynamoDB.DocumentClient();
+
+const query = async (id) => {
+  const scanResult = await dynamo.query({
+    TableName: process.env.TABLE_PPODUCTS,
+    KeyConditionExpression: 'id = :id',
+    ExpressionAttributeValues: {':id': id}
+  }).promise();
+
+  return scanResult;
+}
 
 export async function getProductsById(event) {
   const id = event.pathParameters.id;
+  const matchItem = (await query(id)).Items;
 
-  const matchItem = (await productsList).find((item) => item.id === +id);
-
-  if (!matchItem) {
+  if (!matchItem.length) {
+    console.log('getProductsById for id = ', id, 'item = ', `Product with the id - ${id} not found`);
+    
     return {
-      statusCode: 422,
+      statusCode: 500,
       body: `Product with the id - ${id} not found`,
     };
   }
+
+  console.log('getProductsById for id = ', id, 'item = ', productsResult);
 
   return {
     statusCode: 200,

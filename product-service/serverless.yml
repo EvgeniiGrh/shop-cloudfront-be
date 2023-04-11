@@ -27,6 +27,22 @@ provider:
   region: us-east-1
   httpApi:
     cors: true
+  environment:
+    TABLE_PPODUCTS: products  
+    TABLE_STOCKS: stocks  
+  iam:
+    role: arn:aws:iam::735163746441:role/dynamodblamdaaccess
+      # statements:
+      #   - Effect: "Allow"
+      #     Action:
+      #       - "s3:ListBucket"
+      #     Resource: '*'
+      #   - Effect: "Allow"
+      #     Action:
+      #       - "s3:GetObject"
+      #       - "s3:PutObject"
+      #     Resource:
+      #       - "arn:aws:s3:::"
 
 
 plugins:
@@ -46,24 +62,6 @@ custom:
     typefiles: []
     host: ''
     schemes: ['https']
-
-# you can add statements to the Lambda function's IAM Role here
-#  iam:
-#    role:
-#      statements:
-#        - Effect: "Allow"
-#          Action:
-#            - "s3:ListBucket"
-#          Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
-#        - Effect: "Allow"
-#          Action:
-#            - "s3:PutObject"
-#          Resource:
-#            Fn::Join:
-#              - ""
-#              - - "arn:aws:s3:::"
-#                - "Ref" : "ServerlessDeploymentBucket"
-#                - "/*"
 
 # you can define service wide environment variables here
 #  environment:
@@ -90,6 +88,12 @@ functions:
       - httpApi:
           path: /products/{id}
           method: get
+  createProduct:
+    handler: handlers/createProduct.createProduct
+    events:
+      - httpApi:
+          path: /products
+          method: post        
 
 
 #    The following are a few example events you can configure

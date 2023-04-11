@@ -2,17 +2,24 @@
   "scripts": {
     "test": "jest",
     "swagger": "sls generate-swagger",
-    "start:local": "serverless offline start"
+    "start:local": "serverless offline start",
+    "invoke": "serverless invoke local --function getProductsById --data '{\"pathParameters\": {\"id\": 3}}'",
+    "build": "webpack"
   },
   "devDependencies": {
     "jest": "^29.5.0",
     "serverless-auto-swagger": "^2.12.0",
     "serverless-offline": "^12.0.4",
-    "serverless-webpack": "^5.11.0"
+    "serverless-webpack": "^5.11.0",
+    "webpack-cli": "^5.0.1"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.310.0",
+    "@aws-sdk/lib-dynamodb": "^3.310.0",
     "@babel/plugin-transform-modules-commonjs": "^7.21.2",
+    "aws-sdk": "^2.1353.0",
     "babel-loader": "^9.1.2",
+    "uuid": "^9.0.0",
     "webpack": "^5.77.0",
     "webpack-node-externals": "^3.0.0"
   }
