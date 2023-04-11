@@ -1,5 +1,5 @@
 'use strict';
-import * as AWS from 'aws-sdk'
+import * as AWS from 'aws-sdk';
 
 const dynamo = new AWS.DynamoDB.DocumentClient();
 

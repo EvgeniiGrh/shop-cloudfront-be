@@ -4,13 +4,13 @@ import * as AWS from 'aws-sdk'
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
 const query = async (id) => {
-  const scanResult = await dynamo.query({
+  const result = await dynamo.query({
     TableName: process.env.TABLE_PPODUCTS,
     KeyConditionExpression: 'id = :id',
     ExpressionAttributeValues: {':id': id}
   }).promise();
 
-  return scanResult;
+  return result;
 }
 
 export async function getProductsById(event) {

@@ -1,10 +1,8 @@
 'use strict';
 import {productsList} from '../products.mocks.js';
 import { v4 as uuidv4 } from 'uuid';
-// import * as AWS from 'aws-sdk';
-import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, BatchWriteCommand } from '@aws-sdk/lib-dynamodb';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { BatchWriteCommand } from '@aws-sdk/lib-dynamodb';
 
 const region = 'us-east-1';
 
