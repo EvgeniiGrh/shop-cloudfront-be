@@ -1,4 +1,4 @@
-service: product-service
+service: import-service
 
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
@@ -7,45 +7,47 @@ frameworkVersion: '3'
 provider:
   name: aws
   runtime: nodejs12.x
-  stage: dev
   region: us-east-1
   httpApi:
     cors: true
-  environment:
-    TABLE_PPODUCTS: products  
-    TABLE_STOCKS: stocks  
-  iam:
-    role: arn:aws:iam::735163746441:role/dynamodblamdaaccess
-      # statements:
-      #   - Effect: "Allow"
-      #     Action:
-      #       - "s3:ListBucket"
-      #     Resource: '*'
-      #   - Effect: "Allow"
-      #     Action:
-      #       - "s3:GetObject"
-      #       - "s3:PutObject"
-      #     Resource:
-      #       - "arn:aws:s3:::"
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action: 's3:ListBucket'
+      Resource:
+        - 'arn:aws:s3:::shop-imports-bucket'
+    - Effect: 'Allow'
+      Action: s3:*
+      Resource:
+        - 'arn:aws:s3:::shop-imports-bucket/*'  
 
 
 plugins:
-  - serverless-auto-swagger
-  - serverless-webpack
-  - serverless-offline
+  - serverless-webpack    
 
 custom:
   webpack:
     webpackConfig: 'webpack.config.js' 
-    includeModules: false 
+    includeModules: true 
     packager: 'npm'
-  autoswagger:
-    title: 'string'
-    apiType: 'httpApi'
-    generateSwaggerOnDeploy: true
-    typefiles: []
-    host: ''
-    schemes: ['https']
+
+
+# you can add statements to the Lambda function's IAM Role here
+#  iam:
+#    role:
+#      statements:
+#        - Effect: "Allow"
+#          Action:
+#            - "s3:ListBucket"
+#          Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
+#        - Effect: "Allow"
+#          Action:
+#            - "s3:PutObject"
+#          Resource:
+#            Fn::Join:
+#              - ""
+#              - - "arn:aws:s3:::"
+#                - "Ref" : "ServerlessDeploymentBucket"
+#                - "/*"
 
 # you can define service wide environment variables here
 #  environment:
@@ -60,25 +62,26 @@ custom:
 #    - include-me-dir/**
 
 functions:
-  getProductsList:
-    handler: handlers/getProductsList.getProductsList
-    events:
+  importProductsFile:
+    handler: handlers/importProductsFile.importProductsFile
+    events: 
       - httpApi:
-          path: /products
+          path: /import
           method: get
-  getProductsById:
-    handler: handlers/getProductsById.getProductsById
+          cors: true
+          request:
+            parameters:
+              querystrings:
+                name: true
+  importFileParser:
+    handler: handlers/importFileParser.importFileParser
     events:
-      - httpApi:
-          path: /products/{id}
-          method: get
-  createProduct:
-    handler: handlers/createProduct.createProduct
-    events:
-      - httpApi:
-          path: /products
-          method: post        
-
+      - s3:
+          bucket: shop-imports-bucket
+          event: "s3:ObjectCreated:*"
+          rules:
+            - prefix: uploaded/
+          existing: true            
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
