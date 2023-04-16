@@ -15,7 +15,7 @@ export async function importFileParser(event) {
         for (const record of event.Records) {
             const key = record.s3.object.key;
             const params = {
-                Bucket: BUCKET,
+                Bucket: bucketName,
                 Key: key,
             };
 
@@ -25,6 +25,21 @@ export async function importFileParser(event) {
                 s3Stream
                   .pipe(csv())
                   .on("data", (data) => console.log('Parsed data - ', data))
+                  .on("end", async () => {
+                    await s3
+                      .copyObject({
+                        Bucket: bucketName,
+                        CopySource: bucketName + "/" + key,
+                        Key: key.replace("uploaded", "parsed"),
+                      })
+                      .promise();
+                    await s3
+                      .deleteObject({
+                        Bucket: bucketName,
+                        Key: key,
+                      })
+                      .promise();
+                  });
               });
 
             return {
