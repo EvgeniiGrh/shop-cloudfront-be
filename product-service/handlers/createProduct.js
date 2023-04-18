@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
 const put = async (tableName, item) => {
-  const scanResult = await dynamo.scan({
+  const scanResult = await dynamo.put({
     TableName: tableName,
     Item: item
   }).promise();
