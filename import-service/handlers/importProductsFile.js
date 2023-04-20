@@ -11,6 +11,11 @@ export async function importProductsFile(event) {
 
   try {
     const s3 = new AWS.S3({region: 'us-east-1'});
+
+    if (!event.queryStringParameters.name) {
+      throw {message: 'name is not exist'};
+    }
+    
     const pathProducts = event.queryStringParameters.name;
     const params = {
       Bucket: bucketName,
