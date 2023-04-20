@@ -2,6 +2,20 @@ import AWSMock from 'aws-sdk-mock';
 import AWS from 'aws-sdk';
 import { importProductsFile } from '../importProductsFile';
 
+
+// Mock without 'aws-sdk-mock'
+// jest.mock('aws-sdk', () => {
+//   class mockS3 {
+//     async getSignedUrlPromise(op, obj) {
+//       return 'test URL';
+//     }
+//   }
+//   return {
+//     ...jest.requireActual('aws-sdk'),
+//     S3: mockS3
+//   };
+// });
+
 describe('importProductsFile', () => {
   const HEADERS = {
       "Access-Control-Allow-Origin": "*"
