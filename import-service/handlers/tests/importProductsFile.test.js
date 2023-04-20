@@ -18,15 +18,9 @@ describe('importProductsFile', () => {
 
 
   it('should return response success status', async () => {
-    const expectedData = {
-        statusCode: 200,
-        headers: HEADERS,
-        body: JSON.stringify('Internal server error'),
-      };
-
     const response = await importProductsFile({queryStringParameters: {name: 'test'}});
 
-    await expect(response.statusCode).toStrictEqual(expectedData.statusCode);
+    await expect(response.statusCode).toStrictEqual(200);
   });    
 
 
