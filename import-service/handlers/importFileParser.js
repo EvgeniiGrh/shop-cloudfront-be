@@ -23,7 +23,6 @@ export async function importFileParser(event) {
 
 
         for (const record of event.Records) {
-          console.log('test record: ', record)
             const key = record.s3.object.key;
             const params = {
                 Bucket: bucketName,
@@ -41,15 +40,12 @@ export async function importFileParser(event) {
                     results.push(data);
                   })
                   .on("end", async () => {
-
-                    console.log('results = ', results);
                     sqs.sendMessage({
                       QueueUrl: sqsQueueUrl,
                       MessageBody: JSON.stringify(results)
                   }, (err, data) => {
                     return err ? console.log('sqs error ', err) : console.log('sqs success ', data);
                   })
-
 
                     await s3
                       .copyObject({

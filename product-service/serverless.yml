@@ -16,6 +16,8 @@ provider:
     TABLE_STOCKS: stocks  
     SQS_URL:
       Ref: catalogItemsQueue
+    SNS_ARN:
+      Ref: createProductTopic
   iam:
     # role: arn:aws:iam::735163746441:role/dynamodblamdaaccess
     role:
@@ -39,16 +41,10 @@ provider:
             Fn::GetAtt:
               - catalogItemsQueue
               - Arn
-      #   - Effect: "Allow"
-      #     Action:
-      #       - "s3:ListBucket"
-      #     Resource: '*'
-      #   - Effect: "Allow"
-      #     Action:
-      #       - "s3:GetObject"
-      #       - "s3:PutObject"
-      #     Resource:
-      #       - "arn:aws:s3:::"
+        - Effect: Allow
+          Action:
+            - 'sns:Publish'
+          Resource: '*'      
 
 
 resources:
@@ -57,7 +53,17 @@ resources:
       Type: AWS::SQS::Queue
       Properties:
         QueueName: catalogItemsQueue
-
+    createProductTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: "createProductTopic"
+    cptSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Protocol: email
+        Endpoint: "jonnypeas1327@gmail.com"
+        TopicArn:
+          Ref: createProductTopic
 
 plugins:
   - serverless-auto-swagger

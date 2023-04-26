@@ -46,8 +46,6 @@ export async function createProduct(event) {
           count: payloadData.count
       });
   
-    console.log(`Product with ID [ ${productId} ] has been added`);
-  
     } catch (error) {
   
       console.log(`Internal server error: ${error}`);
