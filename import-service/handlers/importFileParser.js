@@ -6,11 +6,6 @@ const HEADERS = {
     "Access-Control-Allow-Origin": "*"
 };
 
-// const sqsParams = {
-//   DelaySeconds: 10,
-//   MessageBody: 'new object',
-//   QueueUrl: 'https://sqs.us-east-1.amazonaws.com/735163746441/catalogItemsQueue'
-// };
 
 const sqsQueueUrl = 'https://sqs.us-east-1.amazonaws.com/735163746441/catalogItemsQueue';
 
@@ -31,22 +26,25 @@ export async function importFileParser(event) {
 
             const s3Stream = s3.getObject(params).createReadStream();
 
-            const results = [];
 
             await new Promise(() => {
                 s3Stream
                   .pipe(csv({ separator: ';' }))
                   .on("data", (data) => {
-                    results.push(data);
-                  })
-                  .on("end", async () => {
                     sqs.sendMessage({
                       QueueUrl: sqsQueueUrl,
-                      MessageBody: JSON.stringify(results)
+                      MessageBody: JSON.stringify(data),
+                      MessageAttributes: {
+                        'Count': {
+                          DataType: 'String',
+                          StringValue: !!data.count ? 'filled' : 'empty'
+                        }
+                      },
                   }, (err, data) => {
                     return err ? console.log('sqs error ', err) : console.log('sqs success ', data);
                   })
-
+                  })
+                  .on("end", async () => {
                     await s3
                       .copyObject({
                         Bucket: bucketName,
