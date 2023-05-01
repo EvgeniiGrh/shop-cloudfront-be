@@ -64,6 +64,21 @@ resources:
         Endpoint: "jonnypeas1327@gmail.com"
         TopicArn:
           Ref: createProductTopic
+        FilterPolicyScope: MessageAttributes
+        FilterPolicy:
+          Count:
+            - empty
+    cptNonEmptySubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Protocol: email
+        Endpoint: "yauheni_harokh@epam.com"
+        TopicArn: 
+          Ref: createProductTopic
+        FilterPolicyScope: MessageAttributes
+        FilterPolicy:
+          Count:
+            - filled          
 
 plugins:
   - serverless-auto-swagger

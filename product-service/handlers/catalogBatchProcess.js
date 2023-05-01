@@ -7,13 +7,19 @@ export async function catalogBatchProcess (event) {
       const sns = new AWS.SNS({region: 'us-east-1'});
   
       for (const product of products) {
-        const item = await createProduct({body: JSON.stringify(product[0])}); 
+        const item = await createProduct({body: JSON.stringify(product)}); 
 
         console.log('item result = ', item);
 
         const snsResult = await sns.publish({
           Subject: 'sns message about creation product',
           Message: JSON.stringify(item),
+          MessageAttributes: {
+            Count: {
+              DataType: 'String',
+              StringValue: product.count === '0' ? 'empty' : 'filled'
+            }
+          },
           TopicArn: process.env.SNS_ARN
         }).promise();
 
