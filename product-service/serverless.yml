@@ -14,20 +14,71 @@ provider:
   environment:
     TABLE_PPODUCTS: products  
     TABLE_STOCKS: stocks  
+    SQS_URL:
+      Ref: catalogItemsQueue
+    SNS_ARN:
+      Ref: createProductTopic
   iam:
-    role: arn:aws:iam::735163746441:role/dynamodblamdaaccess
-      # statements:
-      #   - Effect: "Allow"
-      #     Action:
-      #       - "s3:ListBucket"
-      #     Resource: '*'
-      #   - Effect: "Allow"
-      #     Action:
-      #       - "s3:GetObject"
-      #       - "s3:PutObject"
-      #     Resource:
-      #       - "arn:aws:s3:::"
+    # role: arn:aws:iam::735163746441:role/dynamodblamdaaccess
+    role:
+      name: lamdaaccess
+      statements:
+        - Effect: Allow
+          Action:
+            - 'dynamodb:Scan'
+            - 'dynamodb:Query'
+            - 'dynamodb:PutItem'
+          Resource:
+            - 'arn:aws:dynamodb:us-east-1:735163746441:table/products'
+            - 'arn:aws:dynamodb:us-east-1:735163746441:table/stocks'
+        - Effect: Allow
+          Action:
+            - 'sqs:SendMessage'
+            - 'sqs:ReceiveMessage'
+            - 'sqs:DeleteMessage'
+            - 'sqs:GetQueueAttributes'
+          Resource:
+            Fn::GetAtt:
+              - catalogItemsQueue
+              - Arn
+        - Effect: Allow
+          Action:
+            - 'sns:Publish'
+          Resource: '*'      
 
+
+resources:
+  Resources:
+    catalogItemsQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: catalogItemsQueue
+    createProductTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: "createProductTopic"
+    cptSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Protocol: email
+        Endpoint: "jonnypeas1327@gmail.com"
+        TopicArn:
+          Ref: createProductTopic
+        FilterPolicyScope: MessageAttributes
+        FilterPolicy:
+          Count:
+            - empty
+    cptNonEmptySubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Protocol: email
+        Endpoint: "yauheni_harokh@epam.com"
+        TopicArn: 
+          Ref: createProductTopic
+        FilterPolicyScope: MessageAttributes
+        FilterPolicy:
+          Count:
+            - filled          
 
 plugins:
   - serverless-auto-swagger
@@ -37,7 +88,7 @@ plugins:
 custom:
   webpack:
     webpackConfig: 'webpack.config.js' 
-    includeModules: false 
+    includeModules: true 
     packager: 'npm'
   autoswagger:
     title: 'string'
@@ -47,9 +98,6 @@ custom:
     host: ''
     schemes: ['https']
 
-# you can define service wide environment variables here
-#  environment:
-#    variable1: value1
 
 # you can add packaging information here
 #package:
@@ -77,7 +125,17 @@ functions:
     events:
       - httpApi:
           path: /products
-          method: post        
+          method: post 
+  catalogBatchProcess:
+    handler: handlers/catalogBatchProcess.catalogBatchProcess
+    events:
+      - sqs:
+          batchSize: 5
+          arn:
+            Fn::GetAtt: 
+              - catalogItemsQueue
+              - Arn
+               
 
 
 #    The following are a few example events you can configure
@@ -119,15 +177,3 @@ functions:
 #    Define function environment variables here
 #    environment:
 #      variable2: value2
-
-# you can add CloudFormation resource templates here
-#resources:
-#  Resources:
-#    NewResource:
-#      Type: AWS::S3::Bucket
-#      Properties:
-#        BucketName: my-new-bucket
-#  Outputs:
-#     NewOutput:
-#       Description: "Description for the output"
-#       Value: "Some output value"

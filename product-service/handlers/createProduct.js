@@ -14,11 +14,13 @@ const put = async (tableName, item) => {
 }
 
 export async function createProduct(event) {
-  console.log(event);
+  console.log('request event = ', event);
 
   const payloadData  = JSON.parse(event.body);
 
-  const props = ['title', 'description', 'price', 'imgUrl', 'count'];
+  const productId = uuidv4();
+
+  const props = ['title', 'description', 'price', 'count']; // imgUrl is optional for now
   const missedFromSchema = props.find(
     prop => !payloadData.hasOwnProperty(prop)
   );
@@ -31,21 +33,18 @@ export async function createProduct(event) {
       ),
     };
   } else {
-    const productId = uuidv4();
-
     try {
+
       await put(process.env.TABLE_PPODUCTS, {
           id: productId, 
           price: payloadData.price, 
           title: payloadData.title, 
-          imgUrl: payloadData.imgUrl, 
+          imgUrl: payloadData.imgUrl || '', 
           description: payloadData.description});
       await put(process.env.TABLE_STOCKS, {
           id: productId, 
           count: payloadData.count
       });
-  
-    console.log(`Product with ID [ ${productId} ] has been added`);
   
     } catch (error) {
   
@@ -60,7 +59,7 @@ export async function createProduct(event) {
     return {
           statusCode: 200,
           body: JSON.stringify(
-            { message: `Product with ID [ ${productId} ] has been added` }
+            { message: `Product with ID [ ${productId} ] has been added`, productId: productId }
           ),
         };
   }
